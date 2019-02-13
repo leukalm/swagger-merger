@@ -5,7 +5,6 @@
 'use strict'
 
 const program = require('commander')
-const util = require('util')
 
 const merger = require('../lib/merger')
 
@@ -15,17 +14,14 @@ program
   .version(require('../package.json').version)
   .usage('[-h] [-v] [-c] [-o file] <-i file | file>')
   .description('Merge multiple swagger files into a swagger file, just support JSON/YAML.')
-  .option('-i, --input <*.json|yaml|yml file>', 'input a main/entry JSON/YAML swagger file, MANDATORY',
+  .option('-i, --input <file>', 'input a main/entry JSON/YAML swagger file',
     /^.+\.(json|yaml|yml)$/gi, null)
-  .option('-o, --output <*.json|yaml|yml file>', 'output a merged JSON/YAML swagger file, default is `swagger.*`',
+  .option('-o, --output <file>', 'output a merged JSON/YAML swagger file, default is `swagger.*`',
     /^.+\.(json|yaml|yml)$/gi, null)
   .option('-c, --compact', 'compact JSON/YAML format string', null, null)
   .option('--debug', 'debug mode, such as print error tracks', null, null)
   .action((options) => {
-    noArgs = !(options.input)
-    if (noArgs) {
-      return
-    }
+    noArgs = false
 
     merger({
       input: options.input || '',
@@ -34,11 +30,10 @@ program
     }).catch(e => {
       if (options.debug) {
         console.error(e)
-      } else if (e.mark) {
-        console.error(util.format('error: %s\ncontent: %s', e.message, e.mark.buffer))
       } else {
-        console.error(util.format('error: %s', e.message))
+        console.error(`error: ${e.message}`)
       }
+      process.exit(1)
     })
   })
 
@@ -53,11 +48,10 @@ if (noArgs) {
     }).catch(e => {
       if (program.opts().debug) {
         console.error(e)
-      } else if (e.mark) {
-        console.error(util.format('error: %s\ncontent: %s', e.message, e.mark.buffer))
       } else {
-        console.error(util.format('error: %s', e.message))
+        console.error(`error: ${e.message}`)
       }
+      process.exit(1)
     })
   } else {
     program.outputHelp()
